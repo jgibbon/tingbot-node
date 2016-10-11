@@ -6,7 +6,7 @@ An unofficial Node.js module to listen for `buttons` pressed and control `backli
 ## Installation ##
 The Tingbot Hardware should already be configured and running – this will not install any drivers or configure your system.
 
-The preinstalled version of Node.js on Raspbian is pretty ancient. Make sure you have installed at least the [current stable version](./installnode.md) including npm.
+The preinstalled version of Node.js on Raspbian is pretty ancient. Make sure you have installed at least the [current stable version](https://github.com/jgibbon/tingbot-node/blob/master/installnode.md) including npm.
 
 > To get a simple Node.js project, just create a directory for it somewhere, place an index.js in it and run `npm init` there.
 

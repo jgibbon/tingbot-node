@@ -1,6 +1,6 @@
 {
   "name": "tingbot-node",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Access Tingbot Hardware (Buttons, Brightness) from NodeJS",
   "main": "index.js",
   "scripts": {
