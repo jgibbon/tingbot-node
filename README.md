@@ -77,7 +77,7 @@ tingbot.set_backlight(0, function() {
 	}, 1500);
 });
 ```
-### Combined example:
+### Combined examples:
 You could combine both modules to set the backlight brightness when Buttons are pressed. In this example, the outer buttons set the value to minimum/maximum, while pressing the inner buttons de-/increases in steps:
 ```javascript
 //get all button down events and modify brightness
@@ -98,5 +98,29 @@ tingbot.on('button:down', function onBtn(data) {
 		tingbot.set_backlight(values[data.number]);
 	}
 });
+```
+Or just exit the process when pressing both inner buttons for a while:
+
+```javascript
+
+//check middle buttons pressed for a bit:
+var checkTimeout;
+var checkFunc = function(cb){
+		return tingbot.buttons.buttons[1].isdown &&
+			tingbot.buttons.buttons[2].isdown;
+}
+tingbot.on('button:down', function(btn){
+	if([1,2].indexOf(btn.number) >= 0 && checkFunc()) { //only listen for both middle buttons
+		clearTimeout(checkTimeout);
+		console.log('cleared. now set');
+		checkTimeout = setTimeout(function dostuff() {
+				if(checkFunc()) {
+					console.log('middle buttons still pressed!');
+					// do something… drastic
+					process.exit();
+				}
+		}, 1200);
+	}
+})
 
 ```
