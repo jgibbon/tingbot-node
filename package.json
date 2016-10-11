@@ -1,0 +1,15 @@
+{
+  "name": "tingbot-node",
+  "version": "0.0.1",
+  "description": "Access Tingbot Hardware (Buttons) from nodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@jgibbon",
+  "license": "MIT",
+  "dependencies": {
+    "shifty": "^1.5.3",
+    "wiring-pi": "^2.2.0"
+  }
+}
