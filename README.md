@@ -10,12 +10,13 @@ The preinstalled version of Node.js on Raspbian is pretty ancient. Make sure you
 
 > To get a simple Node.js project, just create a directory for it somewhere, place an index.js in it and run `npm init` there.
 
-Install tingbot-node first,
+Install tingbot-node first. While wiring-pi installs, you can just keep reading here.
 ```bash
 npm install tingbot-node --save
 ```
+
 ## How To… ##
-use it in your .js file:
+Use it in your .js file:
 ```javascript
 var tb = require('tingbot-node');
 var tingbot = new tb();
@@ -32,7 +33,6 @@ The Buttons Module is available as `tingbot.buttons`, but normally you should ju
  - `button#[0-3]`: Emitted when Button number [0-3] (from left to right) is pressed or released.
  - `button-[name]`: Emitted when Button [name] is pressed or released. [name] can be `left`, `center-left`,  `center-right`, `right`.
  - `button-[pin]`: Emitted when Button on Pin number [pin] is pressed or released.
-
  - ` :down`: can be appended to only get press events. `tingbot.on('button#3:down', function(){})`
  - ` :up`: can be appended to only get release events. `tingbot.on('button-left:up', function(){})`
 
@@ -77,7 +77,7 @@ tingbot.set_backlight(0, function() {
 	}, 1500);
 });
 ```
-### Combined examples:
+## More examples:
 You could combine both modules to set the backlight brightness when Buttons are pressed. In this example, the outer buttons set the value to minimum/maximum, while pressing the inner buttons de-/increases in steps:
 ```javascript
 //get all button down events and modify brightness
@@ -99,7 +99,7 @@ tingbot.on('button:down', function onBtn(data) {
 	}
 });
 ```
-Or just exit the process when pressing both inner buttons for a while:
+Or just exit the application when pressing both inner buttons for a while, a bit like on tingbot-os:
 
 ```javascript
 
@@ -112,7 +112,6 @@ var checkFunc = function(cb){
 tingbot.on('button:down', function(btn){
 	if([1,2].indexOf(btn.number) >= 0 && checkFunc()) { //only listen for both middle buttons
 		clearTimeout(checkTimeout);
-		console.log('cleared. now set');
 		checkTimeout = setTimeout(function dostuff() {
 				if(checkFunc()) {
 					console.log('middle buttons still pressed!');
