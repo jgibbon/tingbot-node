@@ -30,6 +30,9 @@ build/Release
 node_modules
 jspm_packages
 
+# jsdoc output
+out
+
 # Optional npm cache directory
 .npm
 
