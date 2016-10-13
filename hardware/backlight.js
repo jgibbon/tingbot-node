@@ -13,11 +13,33 @@ function run(cmd, cb) {
 	});
 }
 /**
+ *
+ * The Backlight module is available as `tingbot.backlight`. Set `tingbot.backlight.do_tween = true;` for a somewhat smoother brightness change. The module emits the following events via `tingbot.on` or `tingbot.once`:
+ * <ul><li>`backlight`: Emitted when tingbot-node has finished updating the LCD backlight brightness
+ * </li><li>`backlight:tween`: Emitted at every tweening step if tweening is activated
+ * </li><li>`backlight:tweendone`: Emitted when tweening is finished
+ * </li>
+ * </ul>
+ *
+ *	@example
+ *  tingbot.on('backlight', function(obj) {
+ *  	console.log('backlight event:', obj.value);
+ *  });
+ * // run `tingbot.backlight.set_backlight` or short `tingbot.set_backlight` to set brightness
+ * tingbot.set_backlight(0, function() {
+ * 	//does a lot of brightness updates, but can look nice:
+ * 	tingbot.backlight.do_tween = true;
+ * 	setTimeout(function() {
+ * 		//high values will set to maximum
+ * 		tingbot.set_backlight(300000);
+ * 	}, 1500);
+ * });
  * @namespace tingbot.backlight
  */
 
 /**
- * Backlight module. Gets loaded and exposed as the tingbot.backlight namespace
+ * Backlight module. Gets loaded and exposed as
+ * {@link tingbot.backlight}
  * @constructor
  * @class backlight
  * @function
@@ -144,35 +166,49 @@ Backlight.prototype._tween_backlight = function(num, cb) {
 		},
 		finish: function(obj) {
 			// console.log('backlight tween done');
+			//
 			var evdata = {
 				type: 'backlight',
 				value: num
 			};
 			self.current_backlight = num;
-			run('sudo gpio -g pwm 18 "' + self.current_backlight + '"');
-			ev.emit('backlight:tweendone', evdata);
-			ev.emit('backlight', evdata);
 
-			if(cb) {
-				 cb(num);
-			 }
+			self._tween_not_ready = true;
+			run('sudo gpio -g pwm 18 "' + self.current_backlight + '"', function() {
+				ev.emit('backlight:tweendone', evdata);
+				ev.emit('backlight', evdata);
+
+				self._tween_not_ready = false;
+				if(cb) {
+					 cb(evdata);
+				 }
+			});
 		}
 	});
 
 };
+
+
+/**
+ * gets called when set_backlight is done.
+ * @callback tingbot.backlight~setBrightnessCallback
+ * @param {object} tingbot_event
+ * @param {string} tingbot_event.type is 'brightness'
+ * @param {number} tingbot_event.value brightness value
+ */
 
 /**
  * Sets a new brightness value, tweens if do_tween is true
  * @function
  * @memberof tingbot.backlight
  * @fires tingbot#backlight
- * @example <caption>set backlight value</caption>
- * tingbot.backlight.set_backlight(99999, function(val){
+ * @example <caption>set backlight to maximum:</caption>
+ * tingbot.backlight.set_backlight(tingbot.backlight.max_backlight, function(val){
  * 	console.log('done', val);
  * });
  * @name set_backlight
- * @param {number} num the new brightness value
- * @param {function} cb callback when ready, gets value as argument
+ * @param {number} num new brightness value
+ * @param {tingbot.backlight~setBrightnessCallback} [cb] callback when ready
  */
 
 Backlight.prototype.set_backlight = function set_backlight(num, cb) {
@@ -192,17 +228,18 @@ Backlight.prototype.set_backlight = function set_backlight(num, cb) {
 	if (num === this.current_backlight) {
 		return;
 	}
+	var evdata = {
+		type: 'backlight',
+		value: num
+	};
 	if (!this.do_tween) {
 		run('sudo gpio -g pwm 18 "' + num + '"');
-		var evdata = {
-			type: 'backlight',
-			value: num
-		};
+
 		ev.emit('backlight', evdata);
 
 		this.current_backlight = num;
 		if(cb) {
-			cb(num);
+			cb(evdata);
 		}
 	} else {
 		this._tween_backlight(num, cb);
