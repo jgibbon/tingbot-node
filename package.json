@@ -4,6 +4,7 @@
   "description": "Access Tingbot Hardware (Buttons, Brightness) from NodeJS",
   "main": "index.js",
   "scripts": {
+    "builddocs": "gulp docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,11 @@
   "dependencies": {
     "shifty": "^1.5.3",
     "wiring-pi": "^2.2.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-jsdoc-to-markdown": "^1.2.2",
+    "gulp-util": "^3.0.7"
   }
 }
