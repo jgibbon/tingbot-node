@@ -40,12 +40,33 @@ Not really a Module, but the main constructor. Creates a [tingbot](#tingbot) ins
 ```js
 var tb = require('tingbot-node'), tingbot = new tb();
 ```
+
+* [tingbot](#module_tingbot)
+    * _instance_
+        * [.init()](#module_tingbot+init)
+    * _inner_
+        * [~run(cmd, cb)](#module_tingbot..run)
+
 <a name="module_tingbot+init"></a>
 
 ### tingbot.init()
 Loads modules set in this.options.modules once internally and self-destructs. Don't use.
 
 **Kind**: instance method of <code>[tingbot](#module_tingbot)</code>  
+<a name="module_tingbot..run"></a>
+
+### tingbot~run(cmd, cb)
+Internal function to run gpio shell commands.
+Beware: Usually run with sudo! (There is no password handling, because by default,
+ linux user 'pi' is allowed to sudo without a password.)
+
+**Kind**: inner method of <code>[tingbot](#module_tingbot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cmd | <code>string</code> | Command to be exected |
+| cb | <code>function</code> | (error, stdout, stderr): callback when ready. |
+
 <a name="module_backlight"></a>
 
 ## backlight
@@ -63,6 +84,20 @@ Backlight module. Gets loaded and exposed as
 ## buttons
 The Button event listener module gets loaded and exposed as
 [buttons](#tingbot.buttons)
+
+<a name="module_buttons..setButtonChanged"></a>
+
+### buttons~setButtonChanged(number, isdown, buttons)
+internal: Set button changed. Used by wiring-pi callback and simulate methods.
+
+**Kind**: inner method of <code>[buttons](#module_buttons)</code>  
+**Emits**: <code>[button](#tingbot+event_button)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| number | <code>number</code> | button index |
+| isdown | <code>Boolean</code> | true: press; false: release |
+| buttons | <code>Array</code> | since this isn't scoped within tingbot.buttons, those are given via argument |
 
 <a name="tingbot"></a>
 
@@ -156,12 +191,13 @@ tingbot.on('button-left:up', function(data) {
 <a name="tingbot.backlight"></a>
 
 ### tingbot.backlight : <code>object</code>
-The Backlight module is available as `tingbot.backlight`. Set `tingbot.backlight.do_tween = true;` for a somewhat smoother brightness change. The module emits the following events via `tingbot.on` or `tingbot.once`:
-<ul><li>`backlight`: Emitted when tingbot-node has finished updating the LCD backlight brightness
-</li><li>`backlight:tween`: Emitted at every tweening step if tweening is activated
-</li><li>`backlight:tweendone`: Emitted when tweening is finished
-</li>
-</ul>
+The Backlight module is available as `tingbot.backlight`.
+Set `tingbot.backlight.do_tween = true;` for a somewhat smoother brightness change.
+
+The module emits the following events via `tingbot.on` or `tingbot.once`:
+ - `backlight`: Emitted when tingbot-node has finished updating the LCD backlight brightness
+ - `backlight:tween`: Emitted at every tweening step if tweening is activated
+ - `backlight:tweendone`: Emitted when tweening is finished
 
 **Kind**: static namespace of <code>[tingbot](#tingbot)</code>  
 **Example**  
@@ -325,7 +361,6 @@ Array of four current button states
 internal: set pin callback
 
 **Kind**: static property of <code>[buttons](#tingbot.buttons)</code>  
-**Emits**: <code>[button](#tingbot+event_button)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
