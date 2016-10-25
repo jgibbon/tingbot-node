@@ -1,7 +1,9 @@
-
-var shifty = require('shifty');
-var wpi = require('wiring-pi');
+const shifty = require('shifty');
+const wpi = require('wiring-pi');
 const ev = require('../lib/event');
+
+const fs = require('fs');
+const isRaspbian = !!fs.readFileSync('/etc/os-release', 'utf-8').match(/Raspbian/);
 
 /**
  * The Buttons Module is available as `tingbot.buttons`, but normally you should just listen to events fired by it via `tingbot.on` or `tingbot.once`. It emits the following events:
@@ -46,59 +48,61 @@ const ev = require('../lib/event');
  * @name buttons
  * @exports tingbot.buttons
  */
-var Buttons = function Buttons() {
-	var now = new Date();
-	/**
-	 * Array of four current button states
-	 * @type Array.<tingbot#event:button>
-	 * @name tingbot.buttons.buttons
-	 */
-	this.buttons = [{
-		type: 'button',
-		changed: now,
-		changed_before: now,
-		number: 0,
-		pin: 17,
-		name: 'left',
-		value: null,
-		isdown: false,
-		direction: 'up'
-	}, {
-		type: 'button',
-		changed: now,
-		changed_before: now,
-		number: 1,
-		pin: 23,
-		name: 'center-left',
-		value: null,
-		isdown: false,
-		direction: 'up'
-	}, {
-		type: 'button',
-		changed: now,
-		changed_before: now,
-		number: 2,
-		pin: 24,
-		name: 'center-right',
-		value: null,
-		isdown: false,
-		direction: 'up'
-	}, {
-		type: 'button',
-		changed: now,
-		changed_before: now,
-		number: 3,
-		pin: 14,
-		name: 'right',
-		value: null,
-		isdown: false,
-		direction: 'up'
-	}];
-	wpi.wiringPiSetupGpio();
+const Buttons = function Buttons() {
+    var now = new Date();
+    /**
+     * Array of four current button states
+     * @type Array.<tingbot#event:button>
+     * @name tingbot.buttons.buttons
+     */
+    this.buttons = [{
+        type: 'button',
+        changed: now,
+        changed_before: now,
+        number: 0,
+        pin: 17,
+        name: 'left',
+        value: null,
+        isdown: false,
+        direction: 'up'
+    }, {
+        type: 'button',
+        changed: now,
+        changed_before: now,
+        number: 1,
+        pin: 23,
+        name: 'center-left',
+        value: null,
+        isdown: false,
+        direction: 'up'
+    }, {
+        type: 'button',
+        changed: now,
+        changed_before: now,
+        number: 2,
+        pin: 24,
+        name: 'center-right',
+        value: null,
+        isdown: false,
+        direction: 'up'
+    }, {
+        type: 'button',
+        changed: now,
+        changed_before: now,
+        number: 3,
+        pin: 14,
+        name: 'right',
+        value: null,
+        isdown: false,
+        direction: 'up'
+    }];
+    if (isRaspbian) {
+        wpi.wiringPiSetupGpio();
+    }
 
-	for (var i = 0; i < this.buttons.length; i++) {
-		this.setPinCallback(this.buttons[i].pin, i, this.buttons[i].name);
-	}
+    for (let i = 0; i < this.buttons.length; i++) {
+        this.setPinCallback(this.buttons[i].pin, i, this.buttons[i].name);
+    }
 };
 /**
  * Button event. Emitted as 'button' when a change has occurred, but can be optionally suffixed to get selector behavior:<br />
@@ -124,38 +128,67 @@ var Buttons = function Buttons() {
  *  console.log('button left released', data);
  * });
  */
+
+/**
+ * internal: Set button changed. Used by wiring-pi callback and simulate methods.
+ * @param {number} number button index
+ * @param {Boolean} isdown  true: press; false: release
+ * @param {Array} buttons since this isn't scoped within tingbot.buttons, those are given via argument
+ * @fires tingbot#button
+ */
+const setButtonChanged = function(number, isdown, buttons) {
+    //put out more events than anyone should need:
+    buttons[number].isdown = isdown;
+    buttons[number].direction = isdown ? 'down' : 'up';
+    buttons[number].changed_before = buttons[number].changed;
+    buttons[number].changed = new Date();
+    ev.emit('button', buttons[number]);
+    ev.emit('button:' + buttons[number].direction, buttons[number]);
+    ev.emit('button#' + number, buttons[number]);
+    ev.emit('button#' + number + ':' + buttons[number].direction, buttons[number]);
+    ev.emit('button-' + buttons[number].name, buttons[number]);
+    ev.emit('button-' + buttons[number].name + ':' + buttons[number].direction, buttons[number]);
+    ev.emit('button/' + buttons[number].pin, buttons[number]);
+    ev.emit('button/' + buttons[number].pin + ':' + buttons[number].direction, buttons[number]);
+};
+
 /**
  * internal: set pin callback
  * @name tingbot.buttons.setPinCallback
  * @param {number} pin    pin number
  * @param {number} number button index
  * @param {string} name   button name
- * @fires tingbot#button
  */
 Buttons.prototype.setPinCallback = function setPinCallback(pin, number, name) {
-	var self = this;
-	wpi.pinMode(pin, wpi.INPUT);
+    const self = this;
 
-	wpi.wiringPiISR(pin, wpi.INT_EDGE_BOTH, function(delta) {
-		var isdown = (self.buttons[number].value === null || delta > self.buttons[number].value);
-		if (isdown === self.buttons[number].isdown) { //not entirely comfortable with this
-			isdown = !isdown;
-		}
-		//put out more events than anyone should need:
-		self.buttons[number].value = delta;
-		self.buttons[number].isdown = isdown;
-		self.buttons[number].direction = isdown ? 'down' : 'up';
-		self.buttons[number].changed_before = self.buttons[number].changed;
-		self.buttons[number].changed = new Date();
-		ev.emit('button', self.buttons[number]);
-		ev.emit('button:' + self.buttons[number].direction, self.buttons[number]);
-		ev.emit('button#' + number, self.buttons[number]);
-		ev.emit('button#' + number +':' + self.buttons[number].direction, self.buttons[number]);
-		ev.emit('button-' +  self.buttons[number].name, self.buttons[number]);
-		ev.emit('button-' +  self.buttons[number].name+':' + self.buttons[number].direction, self.buttons[number]);
-		ev.emit('button/' + pin, self.buttons[number]);
-		ev.emit('button/' + pin+':' + self.buttons[number].direction, self.buttons[number]);
-	});
+    if (!isRaspbian) {
+        return;
+    }
+    wpi.pinMode(pin, wpi.INPUT);
+
+    wpi.wiringPiISR(pin, wpi.INT_EDGE_BOTH, function(delta) {
+        let isdown = !!wpi.digitalRead(pin);
+        if (isdown !== self.buttons[number].isdown) {
+            self.buttons[number].value = delta;
+            setButtonChanged(number, isdown, self.buttons);
+        }
+    });
+};
+/**
+ * Simulate a button press action. Remember to release the button afterwards. Will fire an event, if the button is already pressed. Might not actually move the physical button.
+ * @param  {number} number Number of the button to be pressed (0-3)
+ */
+Buttons.prototype.simulateDown = function(number) {
+    setButtonChanged(number, true, this.buttons);
+};
+
+/**
+ * Simulate a button release action. Will fire an event, if the button is already released. Might not actually move the physical button.
+ * @param  {number} number Number of the button to be released (0-3)
+ */
+Buttons.prototype.simulateUp = function(number) {
+    setButtonChanged(number, false, this.buttons);
 };
 
 module.exports = new Buttons();
