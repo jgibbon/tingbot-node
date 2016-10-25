@@ -177,6 +177,7 @@ Buttons.prototype.setPinCallback = function setPinCallback(pin, number, name) {
 };
 /**
  * Simulate a button press action. Remember to release the button afterwards. Will fire an event, if the button is already pressed. Might not actually move the physical button.
+ * @name tingbot.buttons.simulateDown
  * @param  {number} number Number of the button to be pressed (0-3)
  */
 Buttons.prototype.simulateDown = function(number) {
@@ -185,6 +186,7 @@ Buttons.prototype.simulateDown = function(number) {
 
 /**
  * Simulate a button release action. Will fire an event, if the button is already released. Might not actually move the physical button.
+ * @name tingbot.buttons.simulateUp
  * @param  {number} number Number of the button to be released (0-3)
  */
 Buttons.prototype.simulateUp = function(number) {

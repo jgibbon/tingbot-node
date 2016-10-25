@@ -130,6 +130,8 @@ var tb = require('tingbot-node'), tingbot = new tb();
         * [.buttons](#tingbot.buttons) : <code>object</code>
             * [.buttons](#tingbot.buttons.buttons) : <code>[Array.&lt;button&gt;](#tingbot+event_button)</code>
             * [.setPinCallback](#tingbot.buttons.setPinCallback)
+            * [.simulateDown](#tingbot.buttons.simulateDown)
+            * [.simulateUp](#tingbot.buttons.simulateUp)
         * [.set_backlight(num, [cb])](#tingbot.set_backlight)
         * [.on(evname, cb)](#tingbot.on)
         * [.once(evname, cb)](#tingbot.once)
@@ -348,6 +350,8 @@ The Buttons Module is available as `tingbot.buttons`, but normally you should ju
 * [.buttons](#tingbot.buttons) : <code>object</code>
     * [.buttons](#tingbot.buttons.buttons) : <code>[Array.&lt;button&gt;](#tingbot+event_button)</code>
     * [.setPinCallback](#tingbot.buttons.setPinCallback)
+    * [.simulateDown](#tingbot.buttons.simulateDown)
+    * [.simulateUp](#tingbot.buttons.simulateUp)
 
 <a name="tingbot.buttons.buttons"></a>
 
@@ -367,6 +371,28 @@ internal: set pin callback
 | pin | <code>number</code> | pin number |
 | number | <code>number</code> | button index |
 | name | <code>string</code> | button name |
+
+<a name="tingbot.buttons.simulateDown"></a>
+
+#### buttons.simulateDown
+Simulate a button press action. Remember to release the button afterwards. Will fire an event, if the button is already pressed. Might not actually move the physical button.
+
+**Kind**: static property of <code>[buttons](#tingbot.buttons)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| number | <code>number</code> | Number of the button to be pressed (0-3) |
+
+<a name="tingbot.buttons.simulateUp"></a>
+
+#### buttons.simulateUp
+Simulate a button release action. Will fire an event, if the button is already released. Might not actually move the physical button.
+
+**Kind**: static property of <code>[buttons](#tingbot.buttons)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| number | <code>number</code> | Number of the button to be released (0-3) |
 
 <a name="tingbot.set_backlight"></a>
 
